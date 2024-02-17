@@ -1,62 +1,88 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <bits/stdc++.h>
 using namespace std;
 
-vector<vector<int > > vi;
-int dep[50003],d[50003][25],chk[50003];
+vector<int> a[100003];
+int parent[100003], check[100003], depth[100003], p[100003][18];
 
-void dfs (int p){
-    for(int i=0;i<vi[p].size(); i++){
-        int t=vi[p][i];
-        if(!chk[t]){
-            chk[t]=1;
-            dep[t]=dep[p]+1;
-            d[t][0]=t;
-            d[t][1]=p;
-            dfs(t);
-        }
-    }
+int lca(int u, int v) {
+	if (depth[u] < depth[v])	swap(u, v);
+
+	int log = 1;
+	for (log = 1; (1 << log) <= depth[u]; log++);
+
+	log -= 1;
+	for (int i = log; i >= 0; i--) {
+		if (depth[u] - (1 << i) >= depth[v]) {
+			u = p[u][i];
+		}
+	}
+
+	if (u == v) {
+		return u;
+	}
+	else {
+		for (int i = log; i >= 0; i--) {
+			if (p[u][i] != 0 && p[u][i] != p[v][i]) {
+				u = p[u][i];
+				v = p[v][i];
+			}
+		}
+		return parent[u];
+	}
 }
 
-int main(){
-    int n,i,a,b,j,m,cnt;
+int main() {
+	//freopen("input.txt", "r", stdin);
+	int n;
 
-    cin >> n;
-    vi.resize(n+1);
+	scanf("%d", &n);
 
-    for(i=1; i<n; i++){
-        cin >>a >>b;
-        vi[a].push_back(b);
-        vi[b].push_back(a);
-    }
+	for (int i = 0; i < n - 1; i++) {
+		int u, v;
+		scanf("%d %d", &u, &v);
+		a[u].push_back(v);
+		a[v].push_back(u);
+	}
 
-    chk[1]=1;
-    dfs(1);
+	depth[1] = 0;
+	check[1] = 1;
+	queue<int>q;
+	q.push(1);
+	parent[1] = 0;
+	while (!q.empty()) {
+		int x = q.front();
+		q.pop();
+		for (int y : a[x]) {
+			if (!check[y]) {
+				depth[y] = depth[x] + 1;
+				check[y] = 1;
+				parent[y] = x;
+				q.push(y);
 
-    for(i=2; i<=20; i++){
-        for(j=1; j<=n; j++){
-            d[j][i]=d[d[j][i-1]][i-1];
-        }
-    }
-    cin >>m;
-    for(i=1; i<=m;i++){
-        cin >>a>>b;
-        if(dep[a]<dep[b]) swap(a,b);
-        if(b==1){cout << 1 <<endl; continue;}
+			}
+		}
+	}
 
-        while(dep[a]!=dep[b]){
-            cnt=1;
-            while(dep[d[a][cnt]]>=dep[b])cnt++;
-            a=d[a][cnt-1];
-        }
+	for (int i = 1; i <= n; i++) {
+		p[i][0] = parent[i];
+	}
+	for (int j = 1; (1 << j) < n; j++) {
+		for (int i = 1; i <= n; i++) {
+			if (p[i][j - 1] != 0) {
+				p[i][j] = p[p[i][j - 1]][j - 1];
+			}
+		}
+	}
 
-        while(1){
-            cnt=0;
-            while(d[a][cnt]!=d[b][cnt])cnt++;
-            if(cnt<=1)break;
-            a=d[a][cnt-1];
-            b=d[b][cnt-1];
-        }
-        cout << d[a][cnt] << '\n';
-    }
-    return 0;
+	int  m;
+
+	scanf("%d", &m);
+
+	while (m--) {
+		int u, v;
+		scanf("%d %d", &u, &v);
+		printf("%d\n", lca(u, v));
+	}
+	return 0;
 }
