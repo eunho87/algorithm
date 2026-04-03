@@ -9,9 +9,8 @@ int n, m;
 void solve() {
     if (v.size() == m) {
         for (int i = 0; i < m; i++) {
-            cout << v[i] << (i == m - 1 ? "" : " ");
+            cout << v[i] << (i == m - 1 ? "\n" : " ");
         }
-        cout << "\n";
         return;
     }
 
